@@ -1,0 +1,312 @@
+﻿@page "/chat"
+@inject HttpClient Client
+@inject IResizeListener _resizeListener
+
+@implements IAsyncDisposable
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+<div class="card br-0 py-2">
+    <div class="card-header bg-main br-0 text-white">
+        <div class="row">
+            <div class="col-10">
+                <h2>پیام‌رسان مسنجور</h2>
+                    
+            </div>
+@*              <div class="col">
+                <button type="button" class="btn btn-outline-secondary float-end" @onclick="HandleLogout">خروج</button> 
+                <label class="float-end me-2 mt-2">@AuthenticationState?.User?.Name خوش اومدی!!!</label>
+            </div> *@
+            <div class="col-2">
+                <div class="dropdown p-1 float-end">
+                    <button class="avatar dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @* <div class="hero-image  dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> *@
+                        @* <div class="hero-text">@AuthenticationState?.User?.Name</div> *@
+                        @* </div> *@
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item">
+                        <div class="w-100">
+                            <div class="flex-column align-items-center justify-content-center">
+                                <div class="my-2 d-flex align-items-center justify-content-center">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyMiAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0xIDE5QzEgMTkuOTY5MyAxLjExNzgzIDIwLjYxOCAxLjM0MzI3IDIxLjA3OTFDMS41NTAyIDIxLjUwMjMgMS44ODY3OSAyMS44NDczIDIuNTE2ODcgMjIuMTMzN0MzLjE3OTYyIDIyLjQzNDkgNC4xNDU0NiAyMi42NTk5IDUuNTYwMiAyMi44MDI4QzYuOTY1MzYgMjIuOTQ0OCA4Ljc0NTI3IDIzIDExIDIzQzEzLjI1NDcgMjMgMTUuMDM0NiAyMi45NDQ4IDE2LjQzOTggMjIuODAyOEMxNy44NTQ1IDIyLjY1OTkgMTguODIwNCAyMi40MzQ5IDE5LjQ4MzEgMjIuMTMzN0MyMC4xMTMyIDIxLjg0NzMgMjAuNDQ5OCAyMS41MDIzIDIwLjY1NjcgMjEuMDc5MUMyMC44ODIyIDIwLjYxOCAyMSAxOS45NjkzIDIxIDE5QzIxIDE4LjAzMDcgMjAuODgyMiAxNy4zODIgMjAuNjU2NyAxNi45MjA5QzIwLjQ0OTggMTYuNDk3NyAyMC4xMTMyIDE2LjE1MjcgMTkuNDgzMSAxNS44NjYzQzE4LjgyMDQgMTUuNTY1MSAxNy44NTQ1IDE1LjM0MDEgMTYuNDM5OCAxNS4xOTcyQzE1LjAzNDYgMTUuMDU1MiAxMy4yNTQ3IDE1IDExIDE1QzguNzQ1MjcgMTUgNi45NjUzNiAxNS4wNTUyIDUuNTYwMiAxNS4xOTcyQzQuMTQ1NDYgMTUuMzQwMSAzLjE3OTYyIDE1LjU2NTEgMi41MTY4NyAxNS44NjYzQzEuODg2NzkgMTYuMTUyNyAxLjU1MDIgMTYuNDk3NyAxLjM0MzI3IDE2LjkyMDlDMS4xMTc4MyAxNy4zODIgMSAxOC4wMzA3IDEgMTlaIiBzdHJva2U9IiMwMDUxNjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8Y2lyY2xlIHI9IjUiIHRyYW5zZm9ybT0ibWF0cml4KC0xIDAgMCAxIDExIDYpIiBzdHJva2U9IiMwMDUxNjgiIHN0cm9rZS13aWR0aD0iMiIvPg0KPC9zdmc+DQo=" />
+                                </div>
+                                <div class="mb-2">
+                                    <div class="text-center">@AuthenticationState?.User?.Name</div>
+                                </div>
+                                <hr />
+                                    <button type="button" class="btn btn-outline-appcolor w-100 m-1">پروفایل</button>
+                                    <br />
+                                    <button type="button" class="btn btn-outline-appcolor w-100 m-1" @onclick="HandleLogout">خروج</button>
+@*                                     <div class="d-flex justify-content-around my-1">
+                                    <button type="button" class="btn btn-outline-secondary float-start mx-1">پروفایل</button>
+                                    <button type="button" class="btn btn-outline-secondary float-end" @onclick="HandleLogout">خروج</button>
+                                </div> *@
+                            </div>
+                        </div>
+                        </li>
+                    </ul>
+                </div>
+                @* <button class=" dropdown-toggle top-0 avatar me-0 mt-0 text-dark" data-bs-toggle="dropdown" aria-expanded="false">@AuthenticationState?.User?.Name</button> *@
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body messages-window bg-light d-flex">
+        <div class="row" style="flex: 1">
+            <div class="col-12 col-md-3 @(IsMediumUp || (!ShowUsers && !ShowMessages) ? "": "d-none" )">
+                <ChatsList Loading="_loadingUsers" Chats="Chats" OnUserSelected="OnUserSelected" />
+            </div>
+            @*<div class="col-sm-8 col-6 d-flex justify-content-center align-items-center" style="background-color: #f4ecff;">*@
+            <div class="col-12 col-md-6 d-flex px-0 @(IsMediumUp || ShowMessages ? "": "d-none" )">
+                @* <ChatDetails SelectedUser="_selectedUser" 
+                    NewIncomingMessage="@_newIncomingMessage"
+                    OnIncomingMessageRecieved = "()=> _newIncomingMessage = null"
+                    OnCancel="HandleChatDetailsCancel" /> *@
+                <CascadingValue Value="this" Name="ContainerPage">
+                    <ChatDetails @ref="chatDetail" SelectedUser="_selectedUser"/>
+                </CascadingValue>
+            </div>
+            <div class="col-12 col-md-3 @(IsMediumUp || (ShowUsers && !ShowMessages) ? "": "d-none" )">
+                <UsersList Loading="_loadingUsers" Users="Users" OnUserSelected="OnUserSelected" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "AuthenticationState")]
+    public AuthenticationState? AuthenticationState { get; set; }
+    BrowserWindowSize browser = new BrowserWindowSize();
+    private bool IsMediumUp { get; set; } = false;
+    private bool ShowMessages { get; set; } = false;
+    private bool ShowUsers { get; set; } = false;
+    private HubConnection? _hubConnection;
+    private ChatDetails? chatDetail { get; set; }
+    private bool _loadingUsers = false;
+    public ICollection<UserModel> Users { get; set; } = new HashSet<UserModel>();
+    public IList<UserModel> Chats { get; set; } = new List<UserModel>();
+
+    private UserModel? _selectedUser = null;
+    //private MessageModel? _newIncomingMessage = null;
+
+    private async Task<bool> IsTokenExpiredAsync()
+    {
+        var jwt = new JwtSecurityToken(AuthenticationState?.Token);
+        if (jwt.ValidTo <= DateTime.Now)
+        {
+            // Token has expired
+            // Navigate to login page
+            await HandleLogout();
+            return true;
+        }
+        return false;
+    }
+
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _resizeListener.OnResized += WindowResized!;
+        IsMediumUp = await _resizeListener.MatchMedia(Breakpoints.MediumUp);
+
+
+        if (!AuthenticationState!.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            if (!await IsTokenExpiredAsync())
+            {
+                _hubConnection = ConfigureHubConnection();
+
+                _loadingUsers = true;
+                var userListTask = GetClient().GetFromJsonAsync<ICollection<UserModel>>("users", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                var chatListTask = GetClient().GetFromJsonAsync<IList<UserModel>>("users/chats", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                await _hubConnection.StartAsync();
+
+                var usersList = await userListTask;
+                if (usersList is not null)
+                {
+                    Users = usersList;
+                }
+
+                var chatsList = await chatListTask;
+                if (chatsList is not null)
+                {
+                    Chats = chatsList;
+                }
+                _loadingUsers = false;
+                await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOnline), AuthenticationState.User);
+                StateHasChanged();
+            }
+        }
+    }
+
+    private HttpClient GetClient()
+    {
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthenticationState!.Token);
+        return Client;
+    }
+
+    private async Task OnUserSelected(UserModel? user)
+    {
+        _selectedUser = user;
+        if(user != null)
+            ShowMessages = true;
+        //if (chatDetail is not null) chatDetail.SelectedUser = user;
+
+        var selectedChatUser = await Task.Run(() => Chats.FirstOrDefault(c => c.IsSelected));
+        if(selectedChatUser is not null)
+        {
+            selectedChatUser.IsSelected = false;
+
+        }
+
+        if (user is null) return;
+
+        var chatUser = Chats.FirstOrDefault(c => c.Id == user.Id);
+        if(chatUser is null)
+        {
+            user.IsSelected = true;
+            Chats.Add(user);
+        }
+        else
+        {
+            chatUser.IsSelected = true;
+            chatUser.HasUnreadMessage = false;
+        }
+
+    }
+
+    public async Task HandleChatDetailsCancel(bool shouldRemoveFromChatsList,UserModel? user)
+    {
+
+        if (shouldRemoveFromChatsList && user is not null) Chats.Remove(user);
+
+        await OnUserSelected(null);
+        ShowMessages = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleLogout()
+    {
+        NavigationManager.NavigateTo("/");
+        if (_hubConnection != null && AuthenticationState != null)
+        {
+            await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), AuthenticationState.User);
+            await JsRuntime.InvokeVoidAsync("window.removeFromStorage", AuthenticationState.AuthStoreKey);
+            AuthenticationState!.UnLoadState();
+        }
+    }
+
+    private HubConnection ConfigureHubConnection()
+    {
+        var hubConnection = new HubConnectionBuilder()
+                            .WithUrl(NavigationManager.ToAbsoluteUri("/hubs/messenjoor"),
+                               options => options.AccessTokenProvider = () => Task.FromResult(AuthenticationState!.Token))
+                            .Build();
+
+        hubConnection.On<UserModel>(nameof(IMessenjoorHubClient.UserConnected), (newUser) =>
+        {
+            Users.Add(newUser);
+            StateHasChanged();
+        });
+
+        hubConnection.On<ICollection<UserModel>>(nameof(IMessenjoorHubClient.OnlineUsersList), (onlineUsers) =>
+        {
+            foreach (var user in Users)
+            {
+                if (onlineUsers.Any(u => u.Id == user.Id))
+                {
+                    user.IsOnline = true;
+                    Chats.FirstOrDefault(c => c.Id == user.Id)!.IsOnline = true;
+
+                }
+                else
+                {
+                    user.IsOnline = false;
+                    Chats.FirstOrDefault(c => c.Id == user.Id)!.IsOnline = false;
+                }
+            }
+            StateHasChanged();
+        });
+
+        hubConnection.On<int>(nameof(IMessenjoorHubClient.UserIsOnline), (userId) =>
+        {
+            var user = Users.FirstOrDefault(u => u.Id == userId);
+            if (user is not null)
+            {
+                user.IsOnline = true;
+                if (_selectedUser!=null && user.Id == _selectedUser.Id)
+                    _selectedUser.IsOnline = true;
+                if(Chats.Any(c => c.Id == userId))
+                    Chats.First(c => c.Id == userId)!.IsOnline = true;
+                StateHasChanged();
+            }
+        });
+
+        hubConnection.On<MessageModel>(nameof(IMessenjoorHubClient.MessageRecieved), (messageDto) =>
+        {
+            var fromUser = Users.FirstOrDefault(u => u.Id == messageDto.FromUserId)!;
+            if (!Chats.Any(c => c.Id == messageDto.FromUserId))
+            {
+                fromUser.HasUnreadMessage = true;
+                Chats.Insert(0, fromUser!);
+            }
+            else
+            {
+                if (_selectedUser?.Id == messageDto.FromUserId)
+                {
+                    // Append the message to the messages list
+                    //_newIncomingMessage = messageDto;
+                    if (chatDetail is not null) Task.Run(async () => await chatDetail.LoadMessagesAsync());
+                }
+                else
+                {
+                    var chatUser = Chats.SingleOrDefault(c => c.Id == messageDto.FromUserId)!;
+                    Chats.Remove(chatUser);
+                    fromUser.IsSelected = false;
+                    fromUser.HasUnreadMessage = true;
+                    Chats.Insert(0, fromUser!);
+
+                }
+
+            }
+            StateHasChanged();
+        });
+
+        return hubConnection;
+    }
+
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        // Get the browsers's width / height
+        browser = window;
+
+        // Check a media query to see if it was matched. We can do this at any time, but it's best to check on each resize
+        IsMediumUp = await _resizeListener.MatchMedia(Breakpoints.MediumUp);
+
+        // We're outside of the component's lifecycle, be sure to let it know it has to re-render.
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+            await _hubConnection.DisposeAsync();
+
+        if (_resizeListener != null) _resizeListener.OnResized -= WindowResized!;
+        try
+        {
+            GC.SuppressFinalize(this);
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+}

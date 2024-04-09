@@ -1,0 +1,152 @@
+﻿@page "/"
+@inject HttpClient httpClient
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<PageTitle>مسنجور</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-3 col-sm-2"></div>
+        <div class="col-lg-4 col-md-6 col-sm-8">
+            <EditForm Model="LoginModel" OnValidSubmit="LoginAsync" enctype="multipart/form-data">
+                <div class="card br-0 mt-5">
+                    <div class="card-header bg-main br-0">
+                        <h2 class="text-white mb-0">ورود</h2>
+                    </div>
+                    <div class="card-body">
+                        <DataAnnotationsValidator />
+                        @if (!string.IsNullOrWhiteSpace(errorMessage))
+                        {
+                            <p class="text-danger">@errorMessage</p>
+                        }
+                        <div class="mb-3">
+                            @* <label class="form-label">نام کاربری</label> *@
+                            <InputText @bind-Value="LoginModel.Username" DisplayName="Username" class="form-control" placeholder="نام کاربری..." />
+                            <ValidationMessage For="() => LoginModel.Username" />
+                        </div>
+                        <div class="mb-3">
+                            @* <label class="form-label">کلمه عبور</label> *@
+                            <InputText type="password" @bind-Value="LoginModel.Password" DisplayName="Password" class="form-control" placeholder="کلمه عبور..." />
+                            <ValidationMessage For="() => LoginModel.Password" />
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-12 p-2">
+                                @if (_isBusy)
+                                {
+                                    <button class="btn btn-outline-appcolor w-100" type="button" disabled>
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        درحال بارگذاری...
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-outline-appcolor w-100">
+                                        ورود
+
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        
+                        <NavLink href="register" class="float-end">ثبت نام</NavLink>
+
+                        
+
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col-lg-4 col-md-3 col-sm-2"></div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter(Name = "AuthenticationState")]
+    public AuthenticationState? AuthenticationState { get; set; }
+
+    private LoginModel LoginModel { get; set; } = new();
+    private bool _isBusy = false;
+    private string? errorMessage = null;
+    private async Task LoginAsync()
+    {
+        try
+        {
+            _isBusy = true;
+            errorMessage = null;
+
+            // httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await httpClient.PostAsJsonAsync<LoginModel>("account/login", LoginModel);
+
+            //var request = new HttpRequestMessage(HttpMethod.Get, "GetWeatherForecast");
+            //var request = new HttpRequestMessage(HttpMethod.Post, "account/login");
+            //request.Content = new StringContent(JsonSerializer.Serialize(LoginModel), Encoding.UTF8, "application/json");
+            //request.Headers.Referrer = new Uri("https://api.messenjoor.com");
+            //request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
+            //var response = await httpClient.SendAsync(request);
+
+            // string _ContentType = "application/json";
+            // //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(_ContentType));
+            // HttpContent _Body = System.Net.Http.Json.JsonContent.Create(JsonConverter.Serialize(LoginModel));
+            // //HttpContent _Body = new StringContent(JsonConvert.SerializeObject(LoginModel), Encoding.UTF8, "application/json");
+            // _Body.Headers.ContentType = new MediaTypeHeaderValue(_ContentType);
+            // var request = new HttpRequestMessage(HttpMethod.Post, "account/login");
+            // //request.Content = new StringContent(JsonConvert.SerializeObject(LoginModel), Encoding.UTF8, "application/json");
+            // //var a = JsonConvert.SerializeObject(LoginModel);
+            // request.Content = _Body;
+            // //request.Content.Headers.ContentType!.MediaType = new MediaTypeHeaderValue("application/json").MediaType!;
+            // //request.Content.Headers.Remove("Content-Type");
+            // //request.Content.Headers.Add("Content-Type", "application/json");
+            // request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
+            // //var a = JsonSerializer.Serialize(LoginModel);
+            // //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            // var response = await httpClient.SendAsync(request);
+
+            // var requestContent = new StringContent(JsonSerializer.Serialize(LoginModel));
+            // requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            // var request = new HttpRequestMessage(HttpMethod.Post, "account/login");
+            // request.Content = requestContent;
+            // request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
+            // var response = await httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var authResult = JsonConverter.Deserialize<AuthResponseModel>(content);
+                
+                var serialized = JsonConverter.Serialize(authResult!);
+                await JsRuntime.InvokeVoidAsync("window.setToStorage", AuthenticationState.AuthStoreKey, serialized);
+                NavigationManager.NavigateTo("/chat");
+                AuthenticationState?.LoadState(authResult!);
+            }
+            else
+            {
+                // LoginModel wasnt successfull
+                string? errorContent = null;
+                try
+                {
+                    errorContent = await response.Content.ReadAsStringAsync();
+                }
+                catch
+                {
+                }
+                if (string.IsNullOrWhiteSpace(errorContent))
+                {
+                    errorContent = $"خطای {response.StatusCode} - ${response.ReasonPhrase}";
+                }
+                _isBusy = false;
+                errorMessage = errorContent;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            _isBusy = false;
+        }
+    }
+}

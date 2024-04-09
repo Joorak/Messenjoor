@@ -1,0 +1,41 @@
+﻿@namespace Messenjoor.UI.Pages
+<h3>گفتگوها</h3>
+<ul class="list-group list-group-flush">
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            در حال بارگذاری...
+        </li>
+    }
+    else
+    {
+        @foreach (var chat in Chats)
+        {
+            <li class="list-group-item @(chat.IsOnline ? " text-success ":" text-body-tertiary ") @(chat.IsSelected ? " bg-primary-subtle " : "")" role='button' @onclick="() => HandleUserClick(chat)">
+                @chat.Name
+                @if (chat.HasUnreadMessage)
+                {
+                    @* <span class="badge text-bg-primary"></span> *@
+                    <span class="position-absolute top-0 translate-middle p-1 ms-2 mt-3 border border-light rounded-circle bg-primary bg-opacity-75" />
+                }
+            </li>
+        }
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public IEnumerable<UserModel> Chats { get; set; } = Enumerable.Empty<UserModel>();
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public EventCallback<UserModel> OnUserSelected { get; set; }
+
+    private async Task HandleUserClick(UserModel chat)
+    {
+        await OnUserSelected.InvokeAsync(chat);
+    }
+}

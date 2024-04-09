@@ -1,0 +1,45 @@
+﻿@namespace Messenjoor.UI.Pages
+@inject HttpClient Client
+
+<h3>کاربران</h3>
+<ul class="list-group list-group-flush">
+    @if (Loading)
+    {
+        <li class="list-group-item">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            در حال بارگذاری...
+        </li>
+    }
+    else
+    {
+        foreach (var user in Users)
+        {
+            <li class="list-group-item cursor-pointer" role='button' @onclick="() => HandleUserClick(user)">
+                
+                <span class="position-absolute top-0 start-0 translate-middle ms-3 p-1 mt-3 border border-light rounded-circle @(user.IsOnline ? "bg-success bg-opacity-75":"bg-secondary bg-opacity-50")" />
+                <span>&thinsp; </span>
+                @user.Name
+                @* <span class="badge rounded-pill @(user.IsOnline ? "bg-success":"bg-secondary-25")"></span> *@
+                @* <i class="@(user.IsOnline ? "fa fa-dot fs-6 text-success":"fa fa-circle-dot")"></i> *@
+                @* <span style="font-size:0.6rem" class="position-absolute top-0 start-0 translate-middle p-2 border border-light rounded-circle @(user.IsOnline ? "bg-success":"bg-body-tertiary bg-opacity-75")"></span> *@
+                @* <span style="font-size:0.6rem" class="bg-@(user.IsOnline ? "success" : "danger")">&#9898;</span> *@
+            </li>
+        }
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public EventCallback<UserModel> OnUserSelected { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+    [Parameter]
+    public ICollection<UserModel> Users { get; set; } = default!;
+
+    private async Task HandleUserClick(UserModel user)
+    {
+        await OnUserSelected.InvokeAsync(user);
+    }
+}

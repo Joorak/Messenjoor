@@ -1,0 +1,13 @@
+﻿@inherits LayoutComponentBase
+
+<CascadingValue Value="AuthenticationState" Name="AuthenticationState">
+    <div class="container-fluid page-loading-progress">
+        @Body
+    </div>
+</CascadingValue>
+
+@code {
+    public AuthenticationState AuthenticationState { get; set; } = new();
+}
+
+

@@ -1,0 +1,213 @@
+﻿@namespace Messenjoor.UI.Pages
+@inject HttpClient Client
+@inject IJSRuntime JsRuntime
+
+@if (SelectedUser is null)
+{
+    <h6 class="text-info mt-5 mx-auto">برای شروع، یکی از گفتگوها را انتخاب نمایید...</h6>
+}
+else
+{
+    <div class="flex-grow-1 d-flex flex-column">
+        <div class="header d-flex justify-content-between bg-main">
+            <h4 class="text-white m-0 p-1">
+                @SelectedUser.Name
+                <br />
+                <h6 class="float-top float-end" style="font-size:0.5rem">@(SelectedUser.IsOnline ? "برخط" : "")</h6>
+            </h4>
+            <button class="btn btn-danger btn-sm fw-bolder fs-4" @onclick="HandleCancelClick">&curvearrowleft;</button>
+        </div>
+        
+        <div class="messages-list">
+            
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <div class="header d-flex justify-content-between bg-danger">
+                    <span class="text-white">@_errorMessage</span>
+                    <button class="btn btn-danger btn-sm" @onclick="() => _errorMessage = null">x</button>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(_infoMessage))
+            {
+                <div class="header d-flex justify-content-between bg-warning">
+                    <span class="text-white">@_infoMessage</span>
+                </div>
+            }
+            <ul id="messages-ul" style="padding: 5px">
+                @if (_loadingMessages)
+                {
+                    <li class="list-group-item">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        در حال بارگذاری پیامها...
+                    </li>
+                }
+                else
+                {
+                    @foreach (var msg in _messages)
+                    {
+                        var incoming = msg.ToUserId == CurrentUserId;
+
+                        var cls = $"justify-content-{(!incoming ? "start" : "end")}";
+
+                        <li class="d-flex @cls">
+                            <p class="single-msg @(!incoming ? "other" : "me")">
+                                @msg.Content.ToPersian()
+                                <br>
+                                <small class="msg-dt">
+                                    @if (msg.SentOn.Date == DateTime.Today.Date)
+                                    {
+                                        @* <span>@msg.SentOn.ToShortTimeString()</span> *@
+                                        <span>@(new PersianDateTime(msg.SentOn).ToLongTimeString().ToPersian())</span>
+                                    }
+                                    else
+                                    {
+                                        @* <span>@msg.SentOn.ToShortDateString() | @msg.SentOn.ToShortTimeString()</span> *@
+                                        <span>@(new PersianDateTime(msg.SentOn).ToLongDateTimeString().ToPersian())</span>
+                                    }
+                                </small>
+                            </p>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="message-input">
+
+            <EditForm Model="_newMessage" OnValidSubmit="HandleSendMessageSubmit">
+                @*                 <div class="">*@
+                    <div class="input-group">
+                        <InputText @bind-Value="_newMessage" placeholder="برای شروع گفتگو چیزی بنویسید..." class="form-control" />
+                        @* <InputTextArea @bind-Value="_newMessage" placeholder="برای شروع گفتگو چیزی بنویسید..." class="form-control" /> *@
+                    <button class="btn-send-svg" type="submit" title="ارسال" id="button-addon1">  ارسال پیام  </button>
+                        @* <button class="btn btn-outline-appcolor " type="submit" id="button-addon1">ارسال</button> *@
+                        @* <div class="btn-send-svg" type="submit" id="button-addon1">ارسال</div> *@
+
+                        
+                        @* <div class="btn-send-svg " type="submit">ارسال</div> *@
+                        @* <img src="img/paper-plane-regular.svg" /> *@
+                        @* <a class="btn btn-primary " href="#navigation-main" aria-label="Skip to main navigation">
+                            <img src="img/paper-plane-regular.svg" alt="Send" style="width:64px;height:64px;">
+                        </a> *@
+                        
+                     </div>
+                @*</div> *@
+            </EditForm>
+
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter(Name = "AuthenticationState")]
+    public AuthenticationState? AuthenticationState { get; set; }
+    [CascadingParameter(Name = "ContainerPage")] Chat? Container { get; set; }
+
+    private int CurrentUserId => AuthenticationState?.User.Id ?? 0;
+
+    [Parameter]
+    public UserModel? SelectedUser { get; set; }
+
+
+
+    private IList<MessageModel> _messages = new List<MessageModel>();
+
+    private string _newMessage = "";
+    private string? _errorMessage;
+    private string? _infoMessage;
+    private int previousSelectedUserId = 0;
+    private bool _scrollToBottom = false;
+    private bool _loadingMessages = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // if (NewIncomingMessage is not null)
+        // {
+        //     //_messages.Add(NewIncomingMessage);
+        //     //await OnIncomingMessageRecieved.InvokeAsync();
+        //     await LoadMessagesAsync();
+        //     _scrollToBottom = true;
+        // }
+
+        // if(SelectedUser is not null && SelectedUser.Id != previousSelectedUserId)
+        // {
+        //     previousSelectedUserId = SelectedUser.Id;
+        //     await LoadMessagesAsync();
+        //     _scrollToBottom = true;
+        // }
+
+        await LoadMessagesAsync();
+        _scrollToBottom = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scrollToBottom)
+        {
+            _scrollToBottom = false;
+            await JsRuntime.InvokeVoidAsync("window.scrollToLastMessage");
+        }
+    }
+
+    public async Task LoadMessagesAsync()
+    {
+        if (SelectedUser is null) return;
+        try
+        {
+            _loadingMessages = true;
+            _messages.Clear();
+            var allMessages = await GetClient().GetFromJsonAsync<IEnumerable<MessageModel>>($"messages/{SelectedUser!.Id}", JsonConverter.JsonSerializerOptions);
+
+            if (allMessages?.Any() == true)
+            {
+                _messages = allMessages.ToList();
+                _errorMessage = null;
+                _infoMessage = null;
+                _scrollToBottom = true;
+            }
+            else
+            {
+                _infoMessage = $"پیامی بین شما و {SelectedUser.Name} مبادله نشده است";
+            }
+
+        }
+        finally
+        {
+            _loadingMessages = false;
+        }
+
+    }
+
+    private async Task HandleCancelClick()
+    {
+        await Container!.HandleChatDetailsCancel(!_messages.Any(), SelectedUser);
+
+    }
+
+    private HttpClient GetClient()
+    {
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthenticationState!.Token);
+        return Client;
+    }
+
+    private async Task HandleSendMessageSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(_newMessage))
+        {
+            var sendMessageDto = new MessageSendModel(SelectedUser!.Id, _newMessage);
+            var response = await GetClient().PostAsJsonAsync("messages", sendMessageDto,JsonSerializerOptions.Default);
+            if (response.IsSuccessStatusCode)
+            {
+                var messageDto = new MessageModel(SelectedUser!.Id, AuthenticationState!.User.Id, _newMessage, DateTime.Now);
+                _messages.Add(messageDto);
+                _scrollToBottom = true;
+                _newMessage = "";
+                _errorMessage = null;
+                _infoMessage = null;
+            }
+            else
+            {
+                _errorMessage = "خطا در ارسال پیام";
+            }
+        }
+    }
+}

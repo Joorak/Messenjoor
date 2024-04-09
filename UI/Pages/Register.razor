@@ -1,0 +1,123 @@
+﻿@page "/register"
+@inject HttpClient HttpClient
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<PageTitle>Messenjoor</PageTitle>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-3 col-sm-2"></div>
+        <div class="col-lg-4 col-md-6 col-sm-8">
+                        <EditForm Model="RegisterModel" OnValidSubmit="RegisterAsync">
+                <div class="card  br-0 mt-5">
+                    <div class="card-header bg-main br-0">
+                        <h2 class="text-white mb-0">ثبت نام</h2>
+                    </div>
+                    <div class="card-body">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <p class="text-danger">@errorMessage</p>
+                }
+                <div class="mb-3">
+                    @* <label class="form-label">Name</label> *@
+                    <InputText @bind-Value="RegisterModel.Name" DisplayName="Name" class="form-control" placeholder="نام مستعار..." />
+                    <ValidationMessage For="() => RegisterModel.Name" />
+                </div>
+
+                <div class="mb-3">
+                    @* <label class="form-label">Username</label> *@
+                    <InputText @bind-Value="RegisterModel.Username" DisplayName="Username" class="form-control" placeholder="نام کاربری..." />
+                    <ValidationMessage For="() => RegisterModel.Username" />
+                </div>
+                <div class="mb-3">
+                    @* <label class="form-label">Password</label> *@
+                    <InputText type="password" @bind-Value="RegisterModel.Password" DisplayName="Password" class="form-control" placeholder="کلمه عبور..." />
+                    <ValidationMessage For="() => RegisterModel.Password" />
+                </div>
+                
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-12 p-2">
+                                @if (_isBusy)
+                                {
+                                    <button class="btn btn-outline-appcolor w-100" type="button" disabled>
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        درحال بارگذاری...
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-outline-appcolor w-100">ثبت</button>
+                                }
+                            </div>
+                        </div>
+
+                        <NavLink href="/"  class="float-end">ورود</NavLink>
+
+                            
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+        <div class="col-lg-4 col-md-3 col-sm-2"></div>
+    </div>
+</div>
+
+
+@code {
+    [CascadingParameter(Name = "AuthenticationState")]
+    public AuthenticationState? AuthenticationState { get; set; }
+
+    private RegisterModel RegisterModel { get; set; } = new();
+    private bool _isBusy = false;
+    private string? errorMessage = null;
+    private async Task RegisterAsync()
+    {
+        try
+        {
+            _isBusy = true;
+            errorMessage = null;
+            var response = await HttpClient.PostAsJsonAsync<RegisterModel>("account/register", RegisterModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var authResult = JsonConverter.Deserialize<AuthResponseModel>(content);
+
+                var serialized = JsonConverter.Serialize(authResult!);
+                await JsRuntime.InvokeVoidAsync("window.setToStorage", AuthenticationState.AuthStoreKey, serialized);
+                //NavigationManager.NavigateTo("/chat");
+                AuthenticationState?.LoadState(authResult!);
+            }
+            else
+            {
+                // LoginModel wasnt successfull
+                string? errorContent = null;
+                try
+                {
+                    errorContent = await response.Content.ReadAsStringAsync();
+                }
+                catch
+                {
+                }
+                if (string.IsNullOrWhiteSpace(errorContent))
+                {
+                    errorContent = $"Error {response.StatusCode} - ${response.ReasonPhrase}";
+                }
+                
+                errorMessage = errorContent;
+            }
+            _isBusy = false;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            _isBusy = false;
+        }
+    }
+}
