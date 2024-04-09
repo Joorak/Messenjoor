@@ -19,7 +19,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.2
+          dotnet-version: 8.0.203
           
       # Install dotnet wasm buildtools workload
       - name: Install .NET WASM Build Tools
