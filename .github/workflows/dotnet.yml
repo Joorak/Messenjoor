@@ -34,3 +34,8 @@ jobs:
         with:
           BRANCH: gh-pages
           FOLDER: dist/wwwroot
+          token: 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
+          clean: true
+          force: true
+        env:
+          DOTNET_ROOT: /usr/share/dotnet
