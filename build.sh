@@ -13,3 +13,4 @@ chmod +x dotnet-install.sh;
 ./dotnet-install.sh -c 8.0 -InstallDir ./dotnet8;
 ./dotnet8/dotnet --version;
 ./dotnet8/dotnet publish ./WebApp/Messenjoor.WebApp.csproj -c Release -o ./dist
+mv ./dist/wwwroot/* ./dist
