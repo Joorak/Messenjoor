@@ -6,7 +6,7 @@ self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 
-const cacheNamePrefix = 'offline-cache-0003';
+const cacheNamePrefix = 'offline-cache-0004';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [/\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/];
 const offlineAssetsExclude = [/^service-worker\.js$/];
@@ -25,7 +25,8 @@ async function onInstall(event) {
 
     // Also cache the host HTML and blazor.webassembly.js
     assetsRequests.push(new Request(baseUrl, { cache: 'no-cache' }));
-    assetsRequests.push(new Request(new URL('_framework/blazor.webassembly.js', baseUrl).href, { cache: 'no-cache' }));
+    //assetsRequests.push(new Request(new URL('_framework/blazor.webassembly.js', baseUrl).href, { cache: 'no-cache' }));
+    assetsRequests.push(new Request(new URL('_framework/blazor.web.js', baseUrl).href, { cache: 'no-cache' }));
 
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
 }
