@@ -11,6 +11,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="wwwroot\ignore.txt" />
+  </ItemGroup>
+  <ItemGroup>
 	<ProjectReference Include="..\Shared\Messenjoor.Shared.csproj" />
 	<ProjectReference Include="..\UI\Messenjoor.UI.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
