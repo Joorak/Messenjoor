@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace Messenjoor.WebApp.Controllers
+namespace Messenjoor.Controllers
 {
     [Authorize]
     public abstract class BaseController : ControllerBase

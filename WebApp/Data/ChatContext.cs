@@ -1,5 +1,5 @@
 ﻿
-namespace Messenjoor.WebApp.Data
+namespace Messenjoor.Data
 {
     public class ChatContext : DbContext
     {

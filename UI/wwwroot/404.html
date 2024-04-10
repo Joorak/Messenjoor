@@ -1,41 +1,38 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Single Page Apps for GitHub Pages</title>
-    <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // https://github.com/rafrex/spa-github-pages
-      // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
-      // ----------------------------------------------------------------------
-      // This script takes the current url and converts the path and query
-      // string into just a query string, and then redirects the browser
-      // to the new url with only a query string and hash fragment,
-      // e.g. http://www.foo.tld/one/two?a=b&c=d#qwe, becomes
-      // http://www.foo.tld/?p=/one/two&q=a=b~and~c=d#qwe
-      // Note: this 404.html file must be at least 512 bytes for it to work
-      // with Internet Explorer (it is currently > 512 bytes)
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
 
-      // If you're creating a Project Pages site and NOT using a custom domain,
-      // then set segmentCount to 1 (enterprise users may need to set it to > 1).
-      // This way the code will only replace the route part of the path, and not
-      // the real directory in which the app resides, for example:
-      // https://username.github.io/repo-name/one/two?a=b&c=d#qwe becomes
-      // https://username.github.io/repo-name/?p=/one/two&q=a=b~and~c=d#qwe
-      // Otherwise, leave segmentCount as 0.
-      var segmentCount = 1;
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Messenjoor</title>
+    <base href="/" />
+    <link href="css/bootstrap.rtl.css" type="text/css" rel="stylesheet" />
+    <link href="css/app.css" type="text/css" rel="stylesheet" />
+    <link href="css/fonts/Vazir-Regular.woff2" type="font/woff2" rel="stylesheet" />
+    <link href="manifest.webmanifest" type="application/manifest+json" rel="manifest" />
+    <link href="icon-512.png" type="image/png" sizes="512x512" rel="apple-touch-icon" />
+    <link href="icon-192.png" type="image/png" sizes="192x192" rel="apple-touch-icon" />
+    <link href="favicon.ico" type="image/x-icon" rel="icon" />
+</head>
 
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?p=/' +
-        l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
 
-    </script>
-  </head>
-  <body>
-  </body>
+    <div id="blazor-error-ui">
+        متاسفانه مشکلی در بارگذاری صفحه بوجود آمده است. لطفا صفحه را مجددا بارگذاری نمایید
+        <a href="" class="reload ms-1">بارگذاری مجدد</a>
+        <!-- <a class="dismiss">🗙</a> -->
+    </div>
+    <script src="js/app.js" type="text/javascript"></script>
+    <script src="js/bootstrap.bundle.min.js" type="text/javascript"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+</body>
+
 </html>

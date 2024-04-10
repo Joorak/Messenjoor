@@ -1,4 +1,4 @@
-﻿using Messenjoor.WebApp.Data;
+﻿using Messenjoor.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 
 
-namespace Messenjoor.WebApp.Controllers
+namespace Messenjoor.Controllers
 {
     [ApiController]
     [Route("[controller]")]

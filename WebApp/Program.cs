@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
-using Messenjoor.WebApp.Components;
+using Messenjoor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()

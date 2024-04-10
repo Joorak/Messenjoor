@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Messenjoor.WebApp.Entities
+namespace Messenjoor.Entities
 {
     [Table("User")]
     public class User

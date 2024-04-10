@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
-namespace Messenjoor.WebApp.Controllers
+namespace Messenjoor.Controllers
 {
     [ApiController]
     [Route("[controller]")]

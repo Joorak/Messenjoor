@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Messenjoor.WebApp.Controllers
+namespace Messenjoor.Controllers
 {
     [ApiController]
     [Route("[controller]")]

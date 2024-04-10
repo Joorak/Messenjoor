@@ -1,10 +1,10 @@
-﻿using Messenjoor.WebApp.Entities;
+﻿using Messenjoor.Entities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Messenjoor.WebApp.Services
+namespace Messenjoor.Services
 {
     public class TokenService
     {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Messenjoor.WebApp.Controllers
+namespace Messenjoor.Controllers
 {
     [Route("[controller]")]
     [ApiController]
