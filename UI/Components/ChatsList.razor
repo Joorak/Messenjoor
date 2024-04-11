@@ -13,11 +13,13 @@
         @foreach (var chat in Chats)
         {
             <li class="list-group-item @(chat.IsOnline ? " text-success ":" text-body-tertiary ") @(chat.IsSelected ? " bg-primary-subtle " : "")" role='button' @onclick="() => HandleUserClick(chat)">
+                <span class="position-absolute top-0 start-0 translate-middle ms-3 p-1 mt-3 border border-light rounded-circle @(chat.IsOnline ? "bg-success bg-opacity-75":"bg-secondary bg-opacity-50")" />
+                <span>&thinsp; </span>
                 @chat.Name
                 @if (chat.HasUnreadMessage)
                 {
                     @* <span class="badge text-bg-primary"></span> *@
-                    <span class="position-absolute top-0 translate-middle p-1 ms-2 mt-3 border border-light rounded-circle bg-primary bg-opacity-75" />
+                    <span class="position-absolute top-0 translate-middle p-2 ms-3 mt-4 border border-light rounded-circle bg-primary bg-opacity-75" />
                 }
             </li>
         }
