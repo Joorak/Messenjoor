@@ -197,6 +197,7 @@ else
             var response = await GetClient().PostAsJsonAsync("messages", sendMessageDto,JsonSerializerOptions.Default);
             if (response.IsSuccessStatusCode)
             {
+                await PushMessege(SelectedUser);
                 var messageDto = new MessageModel(SelectedUser!.Id, AuthenticationState!.User.Id, _newMessage, DateTime.Now);
                 _messages.Add(messageDto);
                 _scrollToBottom = true;
@@ -210,4 +211,17 @@ else
             }
         }
     }
-}
+    private async Task PushMessege(UserModel toUser)
+    {
+        var notificationModel = new PusherNotificationModel();
+        notificationModel.interests = new string[] { toUser.Id.ToString() };
+        notificationModel.web = new Notification(new NotificationContent("مسنجور", $"شما یک پیام جدید از {toUser.Name} دارید"));
+        var client = new HttpClient();
+        client.BaseAddress = new Uri("https://f2c3249c-86c4-41e9-9fdb-d3a644514b27.pushnotifications.pusher.com/");
+        var response = await client.PostAsJsonAsync("publish_api/v1/instances/f2c3249c-86c4-41e9-9fdb-d3a644514b27/publishes", notificationModel, JsonSerializerOptions.Default);
+        if (!response.IsSuccessStatusCode)
+        {
+            _errorMessage = "خطا در پوش نوتیفیکیشن";
+        }
+    }
+    }

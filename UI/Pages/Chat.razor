@@ -1,6 +1,7 @@
 ﻿@page "/chat"
 @inject HttpClient Client
 @inject IResizeListener _resizeListener
+@inject IJSRuntime jsRuntime
 
 @implements IAsyncDisposable
 
@@ -108,6 +109,9 @@
     {
         base.OnInitialized();
 
+
+        // var dotNetObjRef = DotNetObjectReference.Create(this);
+        await jsRuntime.InvokeVoidAsync("window.startNotif", AuthenticationState?.User.Id.ToString());
         _resizeListener.OnResized += WindowResized!;
         IsMediumUp = await _resizeListener.MatchMedia(Breakpoints.MediumUp);
 
@@ -309,4 +313,5 @@
 
         }
     }
+
 }

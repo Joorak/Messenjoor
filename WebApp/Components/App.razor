@@ -23,9 +23,19 @@
     </svg>
     <script src="_framework/blazor.web.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
-
+    
     <script src="js/app.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
+    <script>
+        navigator.serviceWorker.ready.then(serviceWorkerRegistration =>
+                  new PusherPushNotifications.Client({
+                                                                            instanceId: 'f2c3249c-86c4-41e9-9fdb-d3a644514b27',
+                                                                            serviceWorkerRegistration: serviceWorkerRegistration,
+                                                                        })
+                );
+    </script>
+    
 </body>
 
 </html>

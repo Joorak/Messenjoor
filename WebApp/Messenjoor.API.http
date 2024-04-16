@@ -44,3 +44,24 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1MzBhMWY4Y
   "toUserId": 1,
   "message": "سلام"
 }
+
+###
+
+POST https://f2c3249c-86c4-41e9-9fdb-d3a644514b27.pushnotifications.pusher.com/publish_api/v1/instances/f2c3249c-86c4-41e9-9fdb-d3a644514b27/publishes
+Content-Type: application/json
+Authorization: Bearer 0F28E168CC3CDCB9E0018E0C7AF7B17307733A499B96029A8DAF7BFF863A3AF9
+#Accept-Language: en-US,en;q=0.5
+
+{"interests":["1"],"web":{"notification":{"title":"Hello","body":"Hello, world!"}}}
+
+
+###
+
+                                                                            
+                                                                            
+POST https://f2c3249c-86c4-41e9-9fdb-d3a644514b27.pushnotifications.pusher.com/device_api/v1/instances/f2c3249c-86c4-41e9-9fdb-d3a644514b27/devices/web
+Content-Type: application/json
+Authorization: Bearer 0F28E168CC3CDCB9E0018E0C7AF7B17307733A499B96029A8DAF7BFF863A3AF9
+
+
+{"token":""}
