@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /Messenjoor/Server/Chat.db-shm
 /Messenjoor/Server/Chat.db-wal
 /dist/*
+/WebApp/Chat.db-shm
+/WebApp/Chat.db-wal

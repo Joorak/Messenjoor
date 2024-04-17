@@ -7,7 +7,8 @@ self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 
 const cacheNamePrefix = 'offline-cache-0007';
-const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
+//const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
+const cacheName = `${self.assetsManifest.version}`;
 const offlineAssetsInclude = [/\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/];
 const offlineAssetsExclude = [/^service-worker\.js$/];
 // Replace with your base path if you are hosting on a subfolder. Ensure there is a trailing '/'.
