@@ -62,6 +62,15 @@ else
     app.UseHsts();
 }
 
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ChatContext>();
+    if (db.Database.EnsureCreated())
+    {
+        //SeedData.Initialize(db);
+    }
+}
 //app.UseResponseCompression();
 
 app.UseHttpsRedirection();
@@ -75,7 +84,7 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+app.MapNotificationApi();
 //app.MapRazorPages();
 app.MapControllers();
 app.MapRazorComponents<App>()

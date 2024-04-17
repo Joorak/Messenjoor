@@ -9,6 +9,7 @@ namespace Messenjoor.Data
 
         public DbSet<Entities.User> Users { get; set; }
         public DbSet<Entities.Message> Messages { get; set; }
+        public DbSet<Entities.NotificationSubscription> NotificationSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,7 @@ namespace Messenjoor.Data
                 e.HasOne(m=> m.ToUser).WithMany().OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(m=> m.FromUser).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
+
         }
     }
 }

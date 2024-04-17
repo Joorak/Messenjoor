@@ -108,6 +108,8 @@
     {
         base.OnInitialized();
 
+        _ = RequestNotificationSubscriptionAsync();
+
         _resizeListener.OnResized += WindowResized!;
         IsMediumUp = await _resizeListener.MatchMedia(Breakpoints.MediumUp);
 
@@ -146,6 +148,26 @@
         }
     }
 
+    async Task RequestNotificationSubscriptionAsync()
+    {
+        var subscription = await JsRuntime.InvokeAsync<NotificationSubscriptionModel>("blazorPushNotifications.requestSubscription");
+        if (subscription is not null)
+        {
+            try
+            {
+                await SubscribeToNotifications(subscription);
+            }
+            catch (Exception)
+            {
+                
+            }
+        }
+    }
+    public async Task SubscribeToNotifications(NotificationSubscriptionModel subscription)
+    {
+        var response = await GetClient().PutAsJsonAsync("notifications/subscribe", subscription);
+        response.EnsureSuccessStatusCode();
+    }
     private HttpClient GetClient()
     {
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthenticationState!.Token);

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using WebPush;
 
 namespace Messenjoor.Controllers
 {
@@ -40,6 +42,9 @@ namespace Messenjoor.Controllers
                 var responseMessageModel = new MessageModel(message.ToId, message.FromId, message.Content, message.SentOn);
                 await _hubContext.Clients.User(MessageModel.ToUserId.ToString())
                             .MessageRecieved(responseMessageModel);
+
+                await SendNotificationAsync(MessageModel);
+
                 return Ok();
             }
             else
@@ -63,6 +68,35 @@ namespace Messenjoor.Controllers
                             .ToListAsync(cancellationToken);
 
             return messages;
+        }
+
+
+
+
+        private async Task SendNotificationAsync(MessageSendModel MessageModel)
+        {
+            // For a real application, generate your own
+            var publicKey = "BKMWzJ1LyoFwXLU4bzvac-SDyaVsykCjmCOArq9LVumPaumaVEa5UrpDVA_KXL331BkPD5WizxdaJCLKXRDTxKg";
+            var privateKey = "5-YQx7EkZyvOpu9hl7kQO-FsoUuP4VmdZZmiUxEorVU";
+
+            var subscription = await _chatContext.NotificationSubscriptions.Where(e => e.UserId == MessageModel.ToUserId).SingleOrDefaultAsync();
+
+            var pushSubscription = new PushSubscription(subscription?.Url, subscription?.P256dh, subscription?.Auth);
+            var vapidDetails = new VapidDetails("mailto:admin@messenjoor.com", publicKey, privateKey);
+            var webPushClient = new WebPushClient();
+            try
+            {
+                var payload = JsonSerializer.Serialize(new
+                {
+                    MessageModel.Message,
+                    url = $"Messages/{MessageModel.ToUserId}",
+                });
+                await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Error sending push notification: " + ex.Message);
+            }
         }
     }
 }
