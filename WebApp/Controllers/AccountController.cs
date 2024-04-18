@@ -1,8 +1,10 @@
 ﻿using Messenjoor.Shared;
+using Messenjoor.Shared.Helpers;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Messenjoor.Controllers
 {
@@ -10,15 +12,18 @@ namespace Messenjoor.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly ILogger<AccountController> _logger;
         private readonly ChatContext _chatContext;
         private readonly TokenService _tokenService;
         private readonly IHubContext<MessenjoorHub, IMessenjoorHubClient> _hubContext;
+        
 
-        public AccountController(ChatContext chatContext, TokenService tokenService, IHubContext<MessenjoorHub, IMessenjoorHubClient> hubContext)
+        public AccountController(ILogger<AccountController> logger, ChatContext chatContext, TokenService tokenService, IHubContext<MessenjoorHub, IMessenjoorHubClient> hubContext)
         {
             _chatContext = chatContext;
             _tokenService = tokenService;
             _hubContext = hubContext;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -52,12 +57,14 @@ namespace Messenjoor.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginModel dto, CancellationToken cancellationToken)
         {
+            _logger.LogCritical($"login requested by : {JsonConverter.Serialize(dto)}");
             var user = await _chatContext.Users.FirstOrDefaultAsync(u=> u.Username == dto.Username && u.Password == dto.Password, cancellationToken);
             if(user is null)
             {
+                _logger.LogCritical($"login failed for : {JsonConverter.Serialize(dto)}");
                 return BadRequest("احراز هویت ناموفق...");
             }
-
+            _logger.LogCritical($"successfull login for : {JsonConverter.Serialize(dto)}");
             return Ok(GenerateToken(user));
         }
 

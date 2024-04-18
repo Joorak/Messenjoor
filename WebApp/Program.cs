@@ -1,10 +1,18 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Messenjoor.Components;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
+
+Log.Logger = new LoggerConfiguration()
+                        //.ReadFrom.Configuration(builder.Configuration)
+                        .MinimumLevel.Is(Serilog.Events.LogEventLevel.Fatal)
+                        .WriteTo.SQLite(sqliteDbPath: Environment.CurrentDirectory + @"/log.db")
+                        .CreateLogger();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -47,6 +55,8 @@ builder.Services.AddSignalR();
 //});
 builder.Services.AddRazorPages();
 
+builder.Host.UseSerilog();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -73,6 +83,7 @@ using (var scope = scopeFactory.CreateScope())
 }
 //app.UseResponseCompression();
 
+
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
@@ -91,7 +102,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Messenjoor.UI._Imports).Assembly);
 app.MapHub<MessenjoorHub>("/hubs/messenjoor");
-
+Log.Information("Messenjoor Started...");
 //app.MapFallbackToFile("index.html");
 app.Run();
 

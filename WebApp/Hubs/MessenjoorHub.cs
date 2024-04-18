@@ -1,4 +1,5 @@
-﻿using Messenjoor.Shared;
+﻿using Messenjoor.Controllers;
+using Messenjoor.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -7,11 +8,13 @@ namespace Messenjoor.Hubs
     [Authorize]
     public class MessenjoorHub: Hub<IMessenjoorHubClient>, IMessenjoorHubServer
     {
+        private readonly ILogger<AccountController> _logger;
         private static readonly IDictionary<int, UserModel> _onlineUsers = new Dictionary<int, UserModel>();
 
-        public MessenjoorHub()
-        {
 
+        public MessenjoorHub(ILogger<AccountController> logger)
+        {
+            _logger = logger;
         }
 
         public override Task OnConnectedAsync()
@@ -24,7 +27,18 @@ namespace Messenjoor.Hubs
             if (user != null && _onlineUsers.ContainsKey(user.Id))
             {
                 _onlineUsers.Remove(user.Id);
-                await Clients.Others.OnlineUsersList(_onlineUsers.Values);
+                _logger.LogCritical($"{user.Name} logged off");
+                try
+                {
+                    await Clients.Others.OnlineUsersList(_onlineUsers.Values);
+                    _logger.LogCritical($"successful publishing onlineUsersList to hub after {user.Name} Logged off");
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogCritical($"publishing onlineUsersList to hub after {user.Name} Logged off generate error : {ex.Message}");
+                }
+                
             }
         }
 
@@ -34,7 +48,17 @@ namespace Messenjoor.Hubs
             if (!_onlineUsers.ContainsKey(user.Id))
             {
                 _onlineUsers.Add(user.Id, user);
-                await Clients.Others.UserIsOnline(user.Id);
+                _logger.LogCritical($"{user.Name} logged in");
+                try
+                {
+                    await Clients.Others.UserIsOnline(user.Id);
+                    _logger.LogCritical($"successful publishing onlineUsersList to hub after {user.Name} Logged off");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogCritical($"publishing onlineUsersList to hub after {user.Name} Logged in generate error : {ex.Message}"); ;
+                }
+                
             }
         }
     }

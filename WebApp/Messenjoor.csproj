@@ -27,6 +27,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Serilog" Version="3.1.1" />
+	<PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+	<PackageReference Include="Serilog.Sinks.SQLite" Version="6.0.0" />
     <PackageReference Include="WebPush" Version="1.0.12" />
   </ItemGroup>
 </Project>

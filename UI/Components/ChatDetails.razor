@@ -54,15 +54,15 @@ else
                                 @msg.Content.ToPersian()
                                 <br>
                                 <small class="msg-dt">
-                                    @if (msg.SentOn.Date == DateTime.Today.Date)
+                                    @if (msg.SentOn.ToLocalTime().Date == DateTime.Today.Date)
                                     {
                                         @* <span>@msg.SentOn.ToShortTimeString()</span> *@
-                                        <span>@(new PersianDateTime(msg.SentOn).ToLongTimeString().ToPersian())</span>
+                                        <span>@(new PersianDateTime(msg.SentOn.ToLocalTime()).ToLongTimeString().ToPersian())</span>
                                     }
                                     else
                                     {
                                         @* <span>@msg.SentOn.ToShortDateString() | @msg.SentOn.ToShortTimeString()</span> *@
-                                        <span>@(new PersianDateTime(msg.SentOn).ToLongDateTimeString().ToPersian())</span>
+                                        <span>@(new PersianDateTime(msg.SentOn.ToLocalTime()).ToLongDateTimeString().ToPersian())</span>
                                     }
                                 </small>
                             </p>

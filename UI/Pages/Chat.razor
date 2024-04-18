@@ -1,7 +1,6 @@
 ﻿@page "/chat"
 @inject HttpClient Client
 @inject IResizeListener _resizeListener
-
 @implements IAsyncDisposable
 
 @inject NavigationManager NavigationManager
@@ -319,8 +318,12 @@
     public async ValueTask DisposeAsync()
     {
         if (_hubConnection is not null)
+        {
+            if (AuthenticationState is not null)
+                await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), AuthenticationState.User);
             await _hubConnection.DisposeAsync();
-
+        }
+        
         if (_resizeListener != null) _resizeListener.OnResized -= WindowResized!;
         try
         {

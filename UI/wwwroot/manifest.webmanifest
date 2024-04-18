@@ -1,11 +1,11 @@
 {
   "name": "Messenjoor",
   "short_name": "Messenjoor",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#03173d",
-  "prefer_related_applications": false,
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icon-512.png",
