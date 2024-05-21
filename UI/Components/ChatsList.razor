@@ -36,6 +36,7 @@
     [Parameter]
     public EventCallback<UserModel> OnUserSelected { get; set; }
 
+
     private async Task HandleUserClick(UserModel chat)
     {
         await OnUserSelected.InvokeAsync(chat);

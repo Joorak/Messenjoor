@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Messenjoor.Components;
 using Serilog;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
@@ -14,29 +16,47 @@ Log.Logger = new LoggerConfiguration()
                         .CreateLogger();
 
 
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+//}).AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = TokenService.GetTokenValidationParameters(builder.Configuration);
+
+//    options.Events = new JwtBearerEvents
+//    {
+//        OnMessageReceived = (context) =>
+//        {
+//            if (context.Request.Path.StartsWithSegments("/hubs/messenjoor"))
+//            {
+//                var jwt = context.Request.Query["access_token"];
+//                if (!string.IsNullOrWhiteSpace(jwt))
+//                {
+//                    context.Token = jwt;
+//                }
+//            }
+//            return Task.CompletedTask;
+//        }
+//    };
+//});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-}).AddJwtBearer(options =>
+}).AddJwtBearer(jwtBearerOptions =>
 {
-    options.TokenValidationParameters = TokenService.GetTokenValidationParameters(builder.Configuration);
-
-    options.Events = new JwtBearerEvents
+    jwtBearerOptions.RequireHttpsMetadata = true;
+    jwtBearerOptions.SaveToken = true;
+    jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
     {
-        OnMessageReceived = (context) =>
-        {
-            if (context.Request.Path.StartsWithSegments("/hubs/messenjoor"))
-            {
-                var jwt = context.Request.Query["access_token"];
-                if (!string.IsNullOrWhiteSpace(jwt))
-                {
-                    context.Token = jwt;
-                }
-            }
-            return Task.CompletedTask;
-        }
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero
     };
 });
 

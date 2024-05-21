@@ -1,8 +1,8 @@
-﻿@page "/chat"
-@inject HttpClient Client
-@inject IResizeListener _resizeListener
+﻿@page "/"
 @implements IAsyncDisposable
 
+@inject HttpClient Client
+@inject IResizeListener _resizeListener
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 
@@ -32,7 +32,7 @@
                                     <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyMiAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0xIDE5QzEgMTkuOTY5MyAxLjExNzgzIDIwLjYxOCAxLjM0MzI3IDIxLjA3OTFDMS41NTAyIDIxLjUwMjMgMS44ODY3OSAyMS44NDczIDIuNTE2ODcgMjIuMTMzN0MzLjE3OTYyIDIyLjQzNDkgNC4xNDU0NiAyMi42NTk5IDUuNTYwMiAyMi44MDI4QzYuOTY1MzYgMjIuOTQ0OCA4Ljc0NTI3IDIzIDExIDIzQzEzLjI1NDcgMjMgMTUuMDM0NiAyMi45NDQ4IDE2LjQzOTggMjIuODAyOEMxNy44NTQ1IDIyLjY1OTkgMTguODIwNCAyMi40MzQ5IDE5LjQ4MzEgMjIuMTMzN0MyMC4xMTMyIDIxLjg0NzMgMjAuNDQ5OCAyMS41MDIzIDIwLjY1NjcgMjEuMDc5MUMyMC44ODIyIDIwLjYxOCAyMSAxOS45NjkzIDIxIDE5QzIxIDE4LjAzMDcgMjAuODgyMiAxNy4zODIgMjAuNjU2NyAxNi45MjA5QzIwLjQ0OTggMTYuNDk3NyAyMC4xMTMyIDE2LjE1MjcgMTkuNDgzMSAxNS44NjYzQzE4LjgyMDQgMTUuNTY1MSAxNy44NTQ1IDE1LjM0MDEgMTYuNDM5OCAxNS4xOTcyQzE1LjAzNDYgMTUuMDU1MiAxMy4yNTQ3IDE1IDExIDE1QzguNzQ1MjcgMTUgNi45NjUzNiAxNS4wNTUyIDUuNTYwMiAxNS4xOTcyQzQuMTQ1NDYgMTUuMzQwMSAzLjE3OTYyIDE1LjU2NTEgMi41MTY4NyAxNS44NjYzQzEuODg2NzkgMTYuMTUyNyAxLjU1MDIgMTYuNDk3NyAxLjM0MzI3IDE2LjkyMDlDMS4xMTc4MyAxNy4zODIgMSAxOC4wMzA3IDEgMTlaIiBzdHJva2U9IiMwMDUxNjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8Y2lyY2xlIHI9IjUiIHRyYW5zZm9ybT0ibWF0cml4KC0xIDAgMCAxIDExIDYpIiBzdHJva2U9IiMwMDUxNjgiIHN0cm9rZS13aWR0aD0iMiIvPg0KPC9zdmc+DQo=" />
                                 </div>
                                 <div class="mb-2">
-                                    <div class="text-center">@AuthenticationState?.User?.Name</div>
+                                    <div class="text-center">@_authenticationState?.User?.Name!</div>
                                 </div>
                                 <hr />
                                     <button type="button" class="btn btn-outline-appcolor w-100 m-1">پروفایل</button>
@@ -72,12 +72,14 @@
             </div>
         </div>
     </div>
+    <div class="position-absolute bottom-0 start-50 translate-middle-x text-center fw-semibold" style="font-size:0.75rem">Powered By <a class="text-decoration-none" target="_blank" href="https://joorak.com">Joorak.com</a></div>
 </div>
 
 @code {
-    [CascadingParameter(Name = "AuthenticationState")]
-    public AuthenticationState? AuthenticationState { get; set; }
-    BrowserWindowSize browser = new BrowserWindowSize();
+        [CascadingParameter(Name = "AuthenticationState")]
+        public AuthenticationState? _authenticationState { get; set; }
+
+        BrowserWindowSize browser = new BrowserWindowSize();
     private bool IsMediumUp { get; set; } = false;
     private bool ShowMessages { get; set; } = false;
     private bool ShowUsers { get; set; } = false;
@@ -92,7 +94,8 @@
 
     private async Task<bool> IsTokenExpiredAsync()
     {
-        var jwt = new JwtSecurityToken(AuthenticationState?.Token);
+
+        var jwt = new JwtSecurityToken(_authenticationState?.Token);
         if (jwt.ValidTo <= DateTime.Now)
         {
             // Token has expired
@@ -107,44 +110,59 @@
     {
         base.OnInitialized();
 
-        _ = RequestNotificationSubscriptionAsync();
-
         _resizeListener.OnResized += WindowResized!;
         IsMediumUp = await _resizeListener.MatchMedia(Breakpoints.MediumUp);
 
-
-        if (!AuthenticationState!.IsAuthenticated)
+        try
         {
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            if (!await IsTokenExpiredAsync())
+            var authString = await JsRuntime.InvokeAsync<string>("window.getFromStorage", AuthenticationState.AuthStoreKey);
+            var authModel = JsonConverter.Deserialize<AuthResponseModel>(authString);
+            if (authModel == null || string.IsNullOrEmpty(authModel.Token))
             {
-                _hubConnection = ConfigureHubConnection();
-
-                _loadingUsers = true;
-                var userListTask = GetClient().GetFromJsonAsync<ICollection<UserModel>>("users", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-                var chatListTask = GetClient().GetFromJsonAsync<IList<UserModel>>("users/chats", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-
-                await _hubConnection.StartAsync();
-
-                var usersList = await userListTask;
-                if (usersList is not null)
-                {
-                    Users = usersList;
-                }
-
-                var chatsList = await chatListTask;
-                if (chatsList is not null)
-                {
-                    Chats = chatsList;
-                }
-                _loadingUsers = false;
-                await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOnline), AuthenticationState.User);
-                StateHasChanged();
+                await HandleLogout();
+                return;
             }
+
+
+            var jwt = new JwtSecurityToken(authModel.Token);
+            if (jwt.ValidTo <= DateTime.Now)
+            {
+                await HandleLogout();
+                return;
+            }
+            _authenticationState?.LoadState(authModel);
         }
+        catch (Exception)
+        {
+            await HandleLogout();
+            return;
+        }
+
+       
+
+        _ = RequestNotificationSubscriptionAsync();
+        _hubConnection = ConfigureHubConnection();
+
+        _loadingUsers = true;
+        var userListTask = GetClient().GetFromJsonAsync<ICollection<UserModel>>("users", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        var chatListTask = GetClient().GetFromJsonAsync<IList<UserModel>>("users/chats", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+        await _hubConnection.StartAsync();
+
+        var usersList = await userListTask;
+        if (usersList is not null)
+        {
+            Users = usersList;
+        }
+
+        var chatsList = await chatListTask;
+        if (chatsList is not null)
+        {
+            Chats = chatsList;
+        }
+        _loadingUsers = false;
+        await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOnline), _authenticationState?.User);
+        StateHasChanged();
     }
 
     async Task RequestNotificationSubscriptionAsync()
@@ -169,11 +187,11 @@
     }
     private HttpClient GetClient()
     {
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthenticationState!.Token);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authenticationState!.Token);
         return Client;
     }
 
-    private async Task OnUserSelected(UserModel? user)
+    public async Task OnUserSelected(UserModel? user)
     {
         _selectedUser = user;
         if(user != null)
@@ -215,12 +233,12 @@
 
     private async Task HandleLogout()
     {
-        NavigationManager.NavigateTo("/");
-        if (_hubConnection != null && AuthenticationState != null)
+        NavigationManager.NavigateTo("/login");
+        if (_hubConnection != null && _authenticationState != null)
         {
-            await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), AuthenticationState.User);
+            await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), _authenticationState.User);
             await JsRuntime.InvokeVoidAsync("window.removeFromStorage", AuthenticationState.AuthStoreKey);
-            AuthenticationState!.UnLoadState();
+            _authenticationState!.UnLoadState();
         }
     }
 
@@ -228,7 +246,7 @@
     {
         var hubConnection = new HubConnectionBuilder()
                             .WithUrl(NavigationManager.ToAbsoluteUri("/hubs/messenjoor"),
-                               options => options.AccessTokenProvider = () => Task.FromResult(AuthenticationState!.Token))
+                               options => options.AccessTokenProvider = () => Task.FromResult(_authenticationState!.Token))
                             .Build();
 
         hubConnection.On<UserModel>(nameof(IMessenjoorHubClient.UserConnected), (newUser) =>
@@ -319,8 +337,8 @@
     {
         if (_hubConnection is not null)
         {
-            if (AuthenticationState is not null)
-                await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), AuthenticationState.User);
+            if (_authenticationState is not null)
+                await _hubConnection.SendAsync(nameof(IMessenjoorHubServer.SetUserOffline), _authenticationState.User);
             await _hubConnection.DisposeAsync();
         }
         

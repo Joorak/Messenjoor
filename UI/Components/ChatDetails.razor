@@ -100,7 +100,7 @@ else
 @code {
     [CascadingParameter(Name = "AuthenticationState")]
     public AuthenticationState? AuthenticationState { get; set; }
-    [CascadingParameter(Name = "ContainerPage")] Chat? Container { get; set; }
+    [CascadingParameter(Name = "ContainerPage")] Chat Container { get; set; }
 
     private int CurrentUserId => AuthenticationState?.User.Id ?? 0;
 

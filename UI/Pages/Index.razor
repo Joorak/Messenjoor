@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/login"
 @inject HttpClient httpClient
 @inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
@@ -56,7 +56,8 @@
                         
 
 
-                        <div class="clearfix"></div>
+                        <div class="clearfix mb-5"></div>
+                        <div class="position-absolute bottom-0 start-50 translate-middle-x text-center fw-semibold" style="font-size:0.75rem">Powered By <a class="text-decoration-none" target="_blank" href="https://joorak.com">Joorak.com</a></div>
                     </div>
                 </div>
             </EditForm>
@@ -121,7 +122,7 @@
                 
                 var serialized = JsonConverter.Serialize(authResult!);
                 await JsRuntime.InvokeVoidAsync("window.setToStorage", AuthenticationState.AuthStoreKey, serialized);
-                NavigationManager.NavigateTo("/chat");
+                NavigationManager.NavigateTo("/");
                 AuthenticationState?.LoadState(authResult!);
             }
             else
