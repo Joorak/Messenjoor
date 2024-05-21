@@ -4,7 +4,11 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace Messenjoor.Controllers
 {
@@ -12,14 +16,16 @@ namespace Messenjoor.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly ILogger<AccountController> _logger;
         private readonly ChatContext _chatContext;
         private readonly TokenService _tokenService;
         private readonly IHubContext<MessenjoorHub, IMessenjoorHubClient> _hubContext;
         
 
-        public AccountController(ILogger<AccountController> logger, ChatContext chatContext, TokenService tokenService, IHubContext<MessenjoorHub, IMessenjoorHubClient> hubContext)
+        public AccountController(IConfiguration configuration, ILogger<AccountController> logger, ChatContext chatContext, TokenService tokenService, IHubContext<MessenjoorHub, IMessenjoorHubClient> hubContext)
         {
+            _configuration = configuration;
             _chatContext = chatContext;
             _tokenService = tokenService;
             _hubContext = hubContext;
@@ -72,6 +78,38 @@ namespace Messenjoor.Controllers
         {
             var token = _tokenService.GenerateJWT(user);
             return new AuthResponseModel(new UserModel(user.Id, user.Name), token);
+        }
+
+        [HttpGet("ValidateToken/{token}")]
+        public async Task<IActionResult> ValidateToken(string token)
+        {
+            string secretKey = _configuration["Jwt:Key"] ?? "";
+            var key = Encoding.ASCII.GetBytes(secretKey);
+
+            //preparing the validation parameters
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            //SecurityToken securityToken;
+
+            //validating the token
+            var tokenValidationResult = await tokenHandler.ValidateTokenAsync(token, tokenValidationParameters);
+            var jwtSecurityToken = tokenValidationResult.SecurityToken;
+            if (jwtSecurityToken != null
+                && jwtSecurityToken.ValidTo > DateTime.Now)
+            {
+                return Ok(true);
+
+            }
+            else
+            {
+                return Ok(false);
+            }
         }
     }
 }

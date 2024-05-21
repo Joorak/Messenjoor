@@ -32,7 +32,7 @@ namespace Messenjoor.Services
         public string GenerateJWT(IEnumerable<Claim>? additionalClaims = null)
         {
             var securityKey = GetSecurityKey(_configuration);
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             //var expireInMinutes = Convert.ToInt32(_configuration["Jwt:ExpireMinutes"] ?? "525600");
 
             var claims = new List<Claim> {

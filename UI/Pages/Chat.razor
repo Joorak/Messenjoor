@@ -76,10 +76,10 @@
 </div>
 
 @code {
-        [CascadingParameter(Name = "AuthenticationState")]
-        public AuthenticationState? _authenticationState { get; set; }
+    [CascadingParameter(Name = "AuthenticationState")]
+    public AuthenticationState? _authenticationState { get; set; }
 
-        BrowserWindowSize browser = new BrowserWindowSize();
+    BrowserWindowSize browser = new BrowserWindowSize();
     private bool IsMediumUp { get; set; } = false;
     private bool ShowMessages { get; set; } = false;
     private bool ShowUsers { get; set; } = false;
@@ -123,14 +123,14 @@
                 return;
             }
 
-
-            var jwt = new JwtSecurityToken(authModel.Token);
-            if (jwt.ValidTo <= DateTime.Now)
+            bool validToken = await GetClient().GetFromJsonAsync<bool>($"account/ValidateToken/{authModel.Token}", new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            if(!validToken)
             {
                 await HandleLogout();
                 return;
             }
             _authenticationState?.LoadState(authModel);
+
         }
         catch (Exception)
         {

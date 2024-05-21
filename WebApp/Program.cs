@@ -58,6 +58,21 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ClockSkew = TimeSpan.Zero
     };
+    jwtBearerOptions.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = (context) =>
+        {
+            if (context.Request.Path.StartsWithSegments("/hubs/messenjoor"))
+            {
+                var jwt = context.Request.Query["access_token"];
+                if (!string.IsNullOrWhiteSpace(jwt))
+                {
+                    context.Token = jwt;
+                }
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 
