@@ -13,7 +13,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-	<Target Name="CopyCustomContent" Condition=" '$(Configuration)' == 'Release'" AfterTargets="AfterBuild">
+	<Target Name="CopyCustomContent" Condition=" '$(Configuration)' == 'Release'" AfterTargets="AfterPublish">
 		<ItemGroup>
 			<!-- Because this ItemGroup is inside the target, this will enumerate
                  all files just before calling Copy. If the ItemGroup were outside
@@ -22,7 +22,7 @@
 			<MySourceFiles Include="wwwroot\**\*.*"/> -->
 			<MySourceFiles Include="..\UI\wwwroot\**\*.*"/>
 		</ItemGroup>
-		<Copy SourceFiles="@(MySourceFiles)"  DestinationFolder="$(OutDir)\%(RecursiveDir)"  />
+		<Copy SourceFiles="@(MySourceFiles)"  DestinationFolder="$(PublishUrl)\%(RecursiveDir)"  />
 	</Target>
   <ItemGroup>
     <None Include="wwwroot\ignore.txt" />
