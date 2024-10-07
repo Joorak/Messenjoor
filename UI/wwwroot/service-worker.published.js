@@ -21,7 +21,7 @@ self.addEventListener('notificationclick', event => {
     event.waitUntil(clients.openWindow(event.notification.data.url));
 });
 
-const cacheNamePrefix = 'offline-cache-0007';
+const cacheNamePrefix = 'offline-cache-0008';
 //const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const cacheName = `${self.assetsManifest.version}`;
 const offlineAssetsInclude = [/\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/];
