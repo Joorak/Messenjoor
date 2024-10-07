@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	<EnableDefaultContentItems>true</EnableDefaultContentItems>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlazorPro.BlazorSize" Version="6.2.2" />
@@ -15,13 +16,26 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\Messenjoor.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
+	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+		<ItemGroup>
+			<!-- Because this ItemGroup is inside the target, this will enumerate
+                 all files just before calling Copy. If the ItemGroup were outside
+                 the target , it would enumerate the files during evaluation, before
+                 the build starts, which may miss files created during the build. -->
+			<MySourceFiles Include="wwwroot\**\*.*"/>
+		</ItemGroup>
+		<Copy SourceFiles="@(MySourceFiles)"  DestinationFolder="$(OutDir)\%(RecursiveDir)"  />
+	</Target>
+  <!--<ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
-  <ItemGroup>
+  </ItemGroup>-->
+  <!--<ItemGroup>
+    <Content Update="wwwroot\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\js\pushNotifications.js">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>

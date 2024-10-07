@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /dist/*
 /WebApp/Chat.db-shm
 /WebApp/Chat.db-wal
+/dist-win
