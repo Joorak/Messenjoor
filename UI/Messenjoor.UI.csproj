@@ -4,7 +4,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-	<EnableDefaultContentItems>true</EnableDefaultContentItems>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlazorPro.BlazorSize" Version="6.2.2" />
