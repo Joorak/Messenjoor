@@ -25,9 +25,9 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(MySourceFiles)"  DestinationFolder="$(OutDir)\%(RecursiveDir)"  />
 	</Target>-->
-  <!--<ItemGroup>
+  <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>-->
+  </ItemGroup>
   <!--<ItemGroup>
     <Content Update="wwwroot\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
