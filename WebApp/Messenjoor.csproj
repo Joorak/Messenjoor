@@ -20,7 +20,7 @@
                  the target , it would enumerate the files during evaluation, before
                  the build starts, which may miss files created during the build. 
 			<MySourceFiles Include="wwwroot\**\*.*"/> -->
-			<MySourceFiles Include="..\UI\wwwroot\**\*.*"/>
+			<MySourceFiles Include="$(PublishUrl)\wwwroot\**\*.*"/>
 		</ItemGroup>
 		<Copy SourceFiles="@(MySourceFiles)"  DestinationFolder="$(PublishUrl)\%(RecursiveDir)"  />
 	</Target>
